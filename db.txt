@@ -1,0 +1,5 @@
+mongodb+srv://ManavMNairMMR:6kfajp5q@cluster0.usobczb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+
+
+
+mongodb+srv://ManavMNairMMR:6kfajp5q@cluster0.usobczb.mongodb.net/
