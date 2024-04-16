@@ -250,7 +250,6 @@ const Sellers = mongoose.model('Sellers',{
     },
     SellerProfPic :{
         type : String ,
-        required : true,
     }
     ,
     sellerName : {
@@ -279,9 +278,8 @@ const Sellers = mongoose.model('Sellers',{
     paymentInfo : {
         type : String,
     },
-    StoreBannerUrl :{
+    storeBannerUrl :{
         type : String ,
-        required : true,
     },
 })
 
@@ -371,7 +369,7 @@ app.post('/SellerDetails',async (req,res)=>{
 
     
         
-        const { storeName, storeAddress, storeDescription , paymentInfo,sellerId} = req.body;
+        const { storeName, storeAddress, storeDescription , paymentInfo,sellerId,banner} = req.body;
         
         // Find the seller by sellerId
         // const sellerId = req.body.sellerId;
@@ -386,6 +384,7 @@ app.post('/SellerDetails',async (req,res)=>{
         seller.storeAddress = storeAddress;
         seller.storeDescription = storeDescription;
         seller.paymentInfo = paymentInfo;
+
         console.log("completed db >>>", seller);
         // Save the updated seller document
         await seller.save();
@@ -393,6 +392,87 @@ app.post('/SellerDetails',async (req,res)=>{
         return res.status(200).json({ success: true, message: 'Store details added successfully' });
     } catch (error) {
         console.error('Error adding store details:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+    
+})
+
+app.get('/getprofile',async (req,res)=>{
+    const sellerId = req.query.sellerId;
+    console.log("sellerID>>",sellerId);
+
+    try{
+        const seller = await Sellers.findOne({sellerId:sellerId});
+
+        if (!seller) {
+            return res.status(404).json({ success: false, message: 'Seller not found' });
+        } else{
+            console.log("Curent seller details (Before updating )>>>",seller)
+            res.json(seller);
+        }
+
+        
+    } catch (error) {
+        console.error('Error fetching profile data:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+
+})
+
+//endpoint for uploading Store banner
+
+//Image storage engine
+
+const storage2 = multer.diskStorage({
+    destination: './upload/sellerImages',
+    filename:(req,file,cb)=>{
+        return cb(null,`${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
+    }
+})
+
+const upload2 = multer({storage: storage2})
+
+// creating Upload endpoint
+app.use('/sellerimages',express.static('upload/sellerImages'))
+app.post("/bannerupload",upload2.single('store'),(req,res)=>{
+    res.json({
+        success:1,
+        image_url : `http://localhost:${port}/sellerimages/${req.file.filename}`
+    })
+})
+
+//endpoint for updating seller details 
+
+app.post('/updatedetails',async (req,res)=>{
+    try{
+
+    
+        
+        const { storeName, storeAddress, storeDescription , upiId,sellerId,storeBannerUrl} = req.body;
+        
+        console.log("UPI ID >>>", upiId)
+        // Find the seller by sellerId
+        // const sellerId = req.body.sellerId;
+        const seller = await Sellers.findOne({sellerId:sellerId});
+
+        if (!seller) {
+            return res.status(404).json({ success: false, message: 'Seller not found' });
+        }
+
+        // Update store details
+        seller.storeName = storeName;
+        seller.storeAddress = storeAddress;
+        seller.storeDescription = storeDescription;
+        seller.paymentInfo = upiId;
+        seller.storeBannerUrl = storeBannerUrl;
+
+        console.log("completed db >>>", seller);
+        // Save the updated seller document
+        await seller.save();
+        
+        return res.status(200).json({ success: true, message: 'Store details changed successfully' });
+    } catch (error) {
+        console.error('Error changing store details:', error);
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
     
