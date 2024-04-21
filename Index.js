@@ -124,14 +124,24 @@ app.post('/addproduct',async(req,res)=>{
     })
 })
 
-app.post('/removeproduct',async (req,res)=>{
-    await Product.findOneAndDelete({ id : req.body.productId })
-    console.log("Removed");
-    res.json({
-        success : true,
-        productName : req.body.productName,
-    })
-})
+app.post('/removeproduct', async (req, res) => {
+    try {
+        console.log("ID >>>", req.body.id);
+        const deletedProduct = await Product.findOneAndDelete({ productId: req.body.id });
+        if (!deletedProduct) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+        console.log("Removed");
+        res.json({
+            success: true,
+            productName: deletedProduct.productName,
+        });
+    } catch (error) {
+        console.error("Error removing product:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
 
 //Creating API for getting all products
 
