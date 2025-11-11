@@ -16,7 +16,7 @@ app.use(cors()); //to connect outside react app into port 4000
 
 // Database connection with MogoDB
 
-mongoose.connect("mongodb+srv://ManavMNairMMR:6kfajp5q@cluster0.usobczb.mongodb.net/plantit")
+mongoose.connect("mongodb+srv://<Mongoos URL goes here>")
 
 
 //API creation
